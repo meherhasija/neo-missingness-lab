@@ -7,6 +7,7 @@ __pycache__/
 .env
 data/*
 !data/.gitkeep
+!data/neo_asteroid_dataset.csv
 outputs/
 *.pkl
 *.joblib
