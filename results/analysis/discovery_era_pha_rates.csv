@@ -1,0 +1,24 @@
+discovery_decade,diameter_status,Total_Records,PHA_Count,PHA_Rate_Percent
+1890,Diameter Available,1,0,0.0
+1910,Diameter Available,1,0,0.0
+1910,Diameter Missing,1,0,0.0
+1920,Diameter Available,2,0,0.0
+1930,Diameter Available,5,4,80.0
+1930,Diameter Missing,4,2,50.0
+1940,Diameter Available,4,2,50.0
+1950,Diameter Available,45,13,28.888888888888886
+1950,Diameter Missing,37,6,16.216216216216218
+1960,Diameter Available,6,1,16.666666666666664
+1960,Diameter Missing,4,2,50.0
+1970,Diameter Available,55,10,18.181818181818183
+1970,Diameter Missing,63,14,22.22222222222222
+1980,Diameter Available,98,28,28.57142857142857
+1980,Diameter Missing,131,28,21.374045801526716
+1990,Diameter Available,160,56,35.0
+1990,Diameter Missing,728,139,19.09340659340659
+2000,Diameter Available,380,104,27.368421052631582
+2000,Diameter Missing,5632,780,13.849431818181818
+2010,Diameter Available,488,121,24.795081967213115
+2010,Diameter Missing,15133,880,5.815106059604837
+2020,Diameter Available,1,1,100.0
+2020,Diameter Missing,19701,359,1.8222425257601136

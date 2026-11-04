@@ -1,0 +1,9 @@
+H_group,diameter_status,Total_Records,PHA_Count,PHA_Rate_Percent
+H <= 18,Diameter Available,392,81,20.66326530612245
+H <= 18,Diameter Missing,700,106,15.142857142857144
+18 < H <= 20,Diameter Available,435,130,29.88505747126437
+18 < H <= 20,Diameter Missing,3330,587,17.62762762762763
+20 < H <= 22,Diameter Available,274,127,46.35036496350365
+20 < H <= 22,Diameter Missing,6615,1486,22.464096749811034
+H > 22,Diameter Available,143,2,1.3986013986013985
+H > 22,Diameter Missing,30789,31,0.10068530968852511
