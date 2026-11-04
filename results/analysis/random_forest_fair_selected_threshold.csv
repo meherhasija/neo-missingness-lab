@@ -1,0 +1,2 @@
+threshold_selection,minimum_precision_constraint,selected_threshold,OOF_precision_at_selected_threshold,OOF_recall_at_selected_threshold,training_records,test_records,random_state
+5-fold stratified out-of-fold predictions on training data,0.2,0.12333333333333334,0.2025862068965517,0.4838235294117647,34144,8536,42
