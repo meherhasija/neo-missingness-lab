@@ -1,40 +1,42 @@
 # Machine Learning-Based Classification of Potentially Hazardous Near-Earth Objects
 
-## About the Project
+## 1. About the Project
 
-This project studies the classification of Potentially Hazardous Asteroids (PHAs) using machine learning. The main focus is on understanding how missing asteroid diameter measurements affect classification performance.
+This project investigates how missing asteroid diameter measurements affect Machine Learning-based classification of Potentially Hazardous Asteroids (PHAs).
 
-A large portion of the dataset does not contain diameter values. Instead of simply removing these records, this project compares different ways of handling missing data and examines how each approach affects the model's predictions.
+The dataset contains a large number of missing diameter values. Instead of removing all incomplete records, this study compares different missing-data handling strategies and examines their effect on classification performance.
 
-The aim is to understand whether the choice of missing-data handling method changes the classification of potentially hazardous Near-Earth Objects (NEOs).
+The project also investigates whether diameter availability is associated with differences in the observed PHA distribution and whether these patterns vary across asteroid discovery periods.
 
-## Research Question
+## 2. Research Question
 
-How does the missingness of asteroid diameter measurements affect machine learning-based PHA classification, and how do different missing-data handling strategies compare?
+How does selection bias associated with missing asteroid diameter measurements affect Machine Learning-based classification of potentially hazardous near-Earth asteroids, and how do different missing-data handling strategies compare?
 
-## Dataset
+## 3. Dataset
 
 The dataset was obtained from the NASA/JPL Small-Body Database (SBDB).
 
-- Total records: 42,815
-- Records with available PHA labels: 42,680
-- Non-PHA records: 40,130
-- PHA records: 2,550
-- Records with missing diameter: 41,569
-- Percentage of missing diameter values: approximately 97.09%
+| Dataset property | Value |
+|---|---:|
+| Total records | 42,815 |
+| Records with PHA labels | 42,680 |
+| Non-PHA records | 40,130 |
+| PHA records | 2,550 |
+| Missing diameter values | 41,569 |
+| Missing diameter percentage | 97.09% |
 
 All records in the dataset are Near-Earth Objects.
 
 **Target variable:** `pha`
 
-- `Y`: Potentially Hazardous Asteroid
-- `N`: Not classified as a Potentially Hazardous Asteroid
+- `Y`: Classified as a Potentially Hazardous Asteroid.
+- `N`: Not classified as a Potentially Hazardous Asteroid.
 
-The dataset is available in the `data` folder.
+The dataset is stored in the `data/` directory.
 
-## Features Used
+## 4. Features Used
 
-The following six features are used for classification:
+The six main features used in the experiments are:
 
 | Feature | Description |
 |---|---|
@@ -45,65 +47,173 @@ The following six features are used for classification:
 | w | Argument of perihelion |
 | diameter | Asteroid diameter |
 
-The columns `moid` and `H` were excluded because they are directly related to the criteria used to identify potentially hazardous asteroids. They could introduce target leakage into the model.
+The columns `moid` and `H` were excluded because they are directly related to the official PHA classification criteria and could introduce target leakage.
 
-Identifiers and other unsuitable or highly incomplete columns were also excluded.
+Identifiers and unsuitable or highly incomplete columns were also excluded.
 
-## Methodology
+An additional orbital-only experiment used five orbital features: `a`, `e`, `i`, `om`, and `w`, without diameter.
 
-The dataset was cleaned by removing records with missing target labels. An 80:20 stratified train-test split was used with a random state of 42.
+## 5. Methodology
 
-Six missing-data handling strategies were evaluated using the same HistGradientBoostingClassifier configuration.
+Records without PHA target labels were excluded from supervised model training.
 
-### Experiments
+The dataset was divided using an 80:20 stratified train-test split with `random_state=42`.
+
+The six main missing-data strategies were evaluated using `HistGradientBoostingClassifier`.
+
+### Main experiments
 
 | ID | Method | Description |
 |---|---|---|
-| M1 | Native Missing-Value Handling | Uses the model's built-in handling of missing values |
+| M1 | Native Missing-Value Handling | Uses the model's built-in missing-value handling |
 | M2 | Median Imputation | Replaces missing diameter values with the median |
-| M3 | Median Imputation with Missingness Indicator | Adds an indicator to identify originally missing diameter values |
+| M3 | Median + Missingness Indicator | Adds an indicator for originally missing diameter values |
 | M4 | KNN Imputation | Estimates missing values using the 5 nearest neighbours |
-| M5 | Iterative Imputation | Uses Bayesian Ridge regression to estimate missing values iteratively |
+| M5 | Iterative Imputation | Uses Bayesian Ridge regression for iterative estimation |
 | M6 | Complete-Case Analysis | Uses only records with complete feature values |
 
-A Random Forest model was also implemented as an additional algorithmic baseline. Threshold tuning was explored to examine the effect of class imbalance on hazardous asteroid detection.
+### Additional experiment
 
-## Experimental Setup
+**M7: Orbital-Only Baseline**
 
-The following settings were used for the six main experiments:
+This experiment uses only the five orbital features and excludes diameter. It helps examine how classification performance changes when diameter is not used as a predictor.
+
+### Model configuration
 
 - Algorithm: HistGradientBoostingClassifier
 - Maximum iterations: 100
 - Learning rate: 0.1
 - Random state: 42
 - Class weighting: Balanced
+- Early stopping: Disabled
 - Train-test split: 80:20
 - Stratification: Enabled
 
-For a fair comparison, the six methods were also evaluated on a common test subset containing 247 complete-feature records. This allowed their predictions to be compared on the same test observations.
+## 6. Experimental Results
 
-## Results
+### 6.1 Full Test Set Comparison
 
-### Comparison on the Common Test Subset
+M1–M5 were evaluated on the full test set of 8,536 records. M6 uses only complete cases and therefore cannot be directly compared on this full test set.
 
-The following results are based on the same 247 test records for all six methods.
+| Method | Accuracy | Precision | Recall | F1-score | ROC-AUC | AP |
+|---|---:|---:|---:|---:|---:|---:|
+| M1 Native | 77.33% | 16.31% | 67.65% | 0.2629 | 0.8135 | 0.2653 |
+| M2 Median | 76.91% | 16.04% | 67.65% | 0.2593 | 0.8155 | 0.2628 |
+| M3 Median + Indicator | 77.00% | 15.84% | 66.08% | 0.2556 | 0.8129 | 0.2781 |
+| M4 KNN | 76.23% | 15.11% | 64.51% | 0.2449 | 0.7937 | 0.2028 |
+| M5 Iterative | 76.49% | 15.55% | 66.27% | 0.2520 | 0.8030 | 0.2068 |
 
-| Method | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
-|---|---:|---:|---:|---:|---:|
-| M1 Native | 55.06% | 39.55% | 94.59% | 0.5578 | 0.7643 |
-| M2 Median | 53.04% | 38.71% | 97.30% | 0.5538 | 0.7454 |
-| M3 Median + Indicator | 51.01% | 37.95% | 100.00% | 0.5502 | 0.7764 |
-| M4 KNN | 58.70% | 39.39% | 70.27% | 0.5049 | 0.6982 |
-| M5 Iterative | 55.87% | 38.85% | 82.43% | 0.5281 | 0.6822 |
-| M6 Complete-Case | 76.11% | 62.71% | 50.00% | 0.5564 | 0.7763 |
+M1 achieved the highest F1-score among these five methods. M2 achieved the highest ROC-AUC, while M3 achieved the highest Average Precision.
 
-M1 achieved the highest F1-score among the six methods on the common test subset. M3 achieved the highest ROC-AUC and recall.
+### 6.2 Measured-Diameter Test Subset
 
-Complete-case analysis achieved higher accuracy and precision, but its recall was lower. These results show why accuracy alone is not sufficient when evaluating an imbalanced classification problem.
+This comparison uses the same 247 test records with available diameter measurements.
 
-The complete-case model was trained using fewer training records than the other methods, so its results should be interpreted with this difference in mind.
+| Method | Accuracy | Precision | Recall | F1-score | ROC-AUC | AP |
+|---|---:|---:|---:|---:|---:|---:|
+| M1 Native | 61.13% | 42.95% | 90.54% | 0.5826 | 0.8002 | 0.6487 |
+| M2 Median | 58.70% | 41.25% | 89.19% | 0.5641 | 0.7820 | 0.6086 |
+| M3 Median + Indicator | 60.73% | 42.86% | 93.24% | 0.5872 | 0.8103 | 0.6695 |
+| M4 KNN | 62.35% | 41.28% | 60.81% | 0.4918 | 0.7081 | 0.4540 |
+| M5 Iterative | 63.16% | 43.41% | 75.68% | 0.5517 | 0.7264 | 0.4685 |
+| M6 Complete-Case | 76.11% | 62.71% | 50.00% | 0.5564 | 0.7763 | 0.6329 |
 
-## Evaluation Metrics
+M3 achieved the highest F1-score, recall, ROC-AUC and Average Precision among the six methods on this subset. M6 achieved the highest accuracy and precision but had lower recall.
+
+### 6.3 Missing-Diameter Test Subset
+
+This comparison uses 8,289 test records without diameter measurements.
+
+| Method | Accuracy | Precision | Recall | F1-score | ROC-AUC | AP |
+|---|---:|---:|---:|---:|---:|---:|
+| M1 Native | 77.81% | 14.19% | 63.76% | 0.2322 | 0.7992 | 0.1825 |
+| M2 Median | 77.45% | 14.01% | 63.99% | 0.2299 | 0.7995 | 0.1921 |
+| M3 Median + Indicator | 77.49% | 13.63% | 61.47% | 0.2231 | 0.7961 | 0.1936 |
+| M4 KNN | 76.64% | 13.73% | 65.14% | 0.2268 | 0.7951 | 0.1838 |
+| M5 Iterative | 76.89% | 13.80% | 64.68% | 0.2274 | 0.7980 | 0.1793 |
+| M7 Orbital-Only | 75.61% | 13.69% | 68.58% | 0.2282 | 0.7997 | 0.1769 |
+
+M3 achieved the highest Average Precision among the missing-data methods. M7 achieved slightly higher ROC-AUC and recall, showing that orbital-only features can provide useful classification information even when diameter is unavailable.
+
+### 6.4 Repeated Evaluation
+
+The experiments were also evaluated across 10 stratified splits.
+
+For M1 on the full test set, the repeated evaluation produced:
+
+- Mean F1-score: 0.2642 ± 0.0090
+- Mean ROC-AUC: 0.8199 ± 0.0088
+- Mean Average Precision: 0.2667 ± 0.0139
+
+M1 achieved the highest mean among the three reported metrics in the repeated full-test comparison. These results provide additional evidence about variation across splits, but do not establish a universal best method.
+
+## 7. Missingness Analysis
+
+Diameter values are missing for approximately 97.09% of the dataset.
+
+The relationship between diameter availability and PHA labels was investigated.
+
+| Diameter status | Non-PHA | PHA | PHA rate |
+|---|---:|---:|---:|
+| Missing | 39,224 | 2,210 | 5.33% |
+| Available | 906 | 340 | 27.29% |
+
+The observed PHA rate is considerably higher among records with measured diameters.
+
+This indicates that diameter availability is associated with differences in the observed dataset. It may reflect selection effects, but the analysis does not establish a causal relationship.
+
+### 7.1 Analysis by Absolute Magnitude (H)
+
+Diameter availability was also examined across H categories.
+
+| H category | Total records | Diameter available | Availability |
+|---|---:|---:|---:|
+| H ≤ 18 | 1,092 | 392 | 35.90% |
+| 18 < H ≤ 20 | 3,765 | 435 | 11.55% |
+| 20 < H ≤ 22 | 6,889 | 274 | 3.98% |
+| H > 22 | 30,932 | 143 | 0.46% |
+
+The results show a strong decline in diameter availability as H increases.
+
+### 7.2 Discovery-Era Analysis
+
+Diameter availability was examined according to the decade of first observation.
+
+The analysis showed a substantial decline in measured-diameter availability across discovery periods:
+
+- 1990s: 18.02%
+- 2000s: 6.32%
+- 2010s: 3.12%
+- 2020s: approximately 0.01%
+
+The 2020s measured group contains only one record, so it should not be treated as a reliable estimate. Earlier decades also contain relatively small numbers of records.
+
+These patterns suggest that diameter availability is associated with discovery era and observation history. They do not establish causation.
+
+## 8. Investigation of 33 PHA Records with H > 22
+
+The dataset contained 33 records labelled `PHA = Y` despite having H values above 22.
+
+These records were investigated using the NASA/JPL SBDB APIs.
+
+The checks found:
+
+- All 33 records returned `PHA = True` through the individual Object API.
+- All 33 appeared in the current PHA group returned by the Query API.
+- All 33 were also identified as NEOs.
+- Original and JPL H values matched.
+- Original and JPL MOID values were nearly identical.
+- Eight records had reported H uncertainty values.
+- All eight reported uncertainty intervals included H = 22.
+- The other 25 records did not have reported H uncertainty values.
+
+The official CNEOS PHA definition specifies both MOID ≤ 0.05 AU and H ≤ 22. The current SBDB API results therefore present an apparent consistency issue that remains unresolved in this study.
+
+The records were not automatically relabelled or removed.
+
+The investigation files are stored in `results/analysis/`.
+
+## 9. Evaluation Metrics
 
 The models were evaluated using:
 
@@ -114,54 +224,51 @@ The models were evaluated using:
 - ROC-AUC
 - Average Precision
 
-Recall is particularly important in this study because missing a potentially hazardous asteroid may be more concerning than incorrectly flagging a non-PHA object.
+Average Precision and hazardous-class recall are particularly important because the dataset is imbalanced and missing a potentially hazardous asteroid may be more concerning than incorrectly flagging a non-PHA object.
 
-## Repository Structure
+The PHA label represents an existing classification, not the probability that an asteroid will impact Earth.
 
-The project files are organised into the following folders:
-- data/: Contains the NASA asteroid dataset.
-- notebooks/: Contains the seven Jupyter notebooks used for the experiments.
-- results/metrics/: Contains evaluation metrics for each experiment.
-- results/predictions/: Contains the model predictions.
-- results/: Contains the combined comparison of all six missing-data methods.
-- src/: Source code for the project.
-- tests/: Test files.
-- docs/: Project documentation.
+## 10. Repository Structure
 
-## How to Run the Project
+- `data/`: Dataset used in the experiments.
+- `notebooks/`: Jupyter notebooks for the experiments and evaluation.
+- `results/metrics/`: Model evaluation metrics.
+- `results/predictions/`: Model predictions.
+- `results/analysis/`: Missingness analysis, discovery-era analysis and JPL verification results.
+- `src/`: Project source code.
+- `tests/`: Test files.
+- `docs/`: Project documentation.
 
-Clone the repository from GitHub.
-Open the project folder in VS Code or Jupyter Notebook.
-Install the required Python libraries using requirements.txt.
-Open the required experiment notebook from the notebooks/ folder.
-Make sure the dataset is available in the data/ folder.
+## 11. Limitations
 
-Run the notebook cells in order.
-Make sure the dataset is available in the `data` folder when running the notebooks locally. If using Google Colab, upload the dataset or update the dataset path accordingly.
+- Approximately 97.09% of diameter values are missing.
+- Diameter availability is associated with differences in the observed PHA distribution.
+- The target variable is imbalanced.
+- Complete-case analysis uses a much smaller subset.
+- The experiments depend on the dataset snapshot, selected features, model configuration and data split.
+- The repeated evaluation uses a finite number of splits.
+- The original dataset retrieval date and exact original API query provenance have not been fully established.
+- The apparent discrepancy involving 33 PHA-labelled records with H > 22 remains unresolved.
+- The study identifies associations and does not establish causal relationships.
 
-## Limitations
+## 12. Conclusion
 
-- Diameter measurements are missing for approximately 97.09% of the dataset.
-- The availability of diameter measurements is associated with differences in the observed PHA distribution. This may reflect selection effects in the available observations.
-- The dataset contains an imbalanced target variable, with considerably fewer PHA records.
-- The complete-case experiment uses a much smaller subset of the available data.
-- The results depend on the dataset snapshot, selected features, model configuration and train-test split.
+This project investigates how missing asteroid diameter measurements affect PHA classification using multiple missing-data handling strategies.
 
-## Conclusion
+The results show that different strategies produce different classification outcomes. Native missing-value handling and median imputation with missingness indicators provide useful approaches, while complete-case analysis demonstrates the limitations of discarding records with missing values.
 
-This project compares six approaches to handling missing asteroid diameter measurements in PHA classification.
+The missingness analysis also shows that diameter availability is associated with H categories, discovery periods and differences in observed PHA rates.
 
-The experiments show that different missing-data strategies produce different classification results. Native missing-value handling and median imputation with a missingness indicator provide useful alternatives, while complete-case analysis illustrates the limitations of discarding records with missing values.
+The investigation of 33 records with H > 22 provides an additional data-validation finding that requires further clarification.
 
-The study highlights the importance of examining missing-data patterns and using multiple evaluation metrics when building classification models for imbalanced datasets.
+Overall, the study highlights the importance of understanding missing-data patterns, preventing target leakage and using multiple evaluation metrics when developing classification models for imbalanced astronomical datasets.
 
-## References
+## 13. References
 
 1. NASA/JPL Small-Body Database Query API: https://ssd-api.jpl.nasa.gov/doc/sbdb_query.html
 2. NASA/JPL Small-Body Database API: https://ssd-api.jpl.nasa.gov/doc/sbdb.html
-3. Malakouti et al. (2023). *Machine learning techniques for classifying dangerous asteroids*. MethodsX, 11, 102337.
-4. Nair and Babu (2025). *Effective Hazard Categorization of Near-Earth Objects with Random Forest Techniques*. Procedia Computer Science, 259, 1682-1692.
-
----
+3. NASA CNEOS, Near-Earth Object Groups: https://cneos.jpl.nasa.gov/about/neo_groups.html
+4. Malakouti et al. (2023). *Machine learning techniques for classifying dangerous asteroids*. MethodsX, 11, 102337.
+5. Nair and Babu (2025). *Effective Hazard Categorization of Near-Earth Objects with Random Forest Techniques*. Procedia Computer Science, 259, 1682–1692.
 
 **Project Repository:** https://github.com/meherhasija/neo-missingness-lab
