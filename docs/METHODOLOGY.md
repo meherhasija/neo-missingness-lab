@@ -8,7 +8,16 @@ The main focus is to study how missing asteroid diameter measurements affect cla
 
 The research also examines whether diameter availability is related to absolute magnitude and discovery period.
 
-## 2. Dataset Collection
+## 2. Related Research
+
+Previous studies have explored the use of machine learning techniques for classifying potentially hazardous asteroids.
+
+- Nair and Babu (2025) used Random Forest techniques for Near-Earth Object hazard classification.
+- Malakouti et al. (2023) compared different machine learning algorithms, including Extra Trees, Random Forest, LightGBM, Gradient Boosting and AdaBoost, for dangerous asteroid classification.
+
+These studies provide background for applying machine learning to asteroid hazard classification. This project extends the investigation by focusing on missing diameter measurements and comparing different missing-data handling strategies.
+
+## 3. Dataset Collection
 
 The dataset is obtained from the NASA/JPL Small-Body Database.
 
@@ -27,7 +36,7 @@ The positive class represents approximately 5.97% of the labelled dataset.
 
 Diameter is missing in 41,569 records of the original dataset, which represents approximately 97.09%.
 
-## 3. Data Preprocessing
+## 4. Data Preprocessing
 
 The following preprocessing steps are performed:
 
@@ -43,7 +52,7 @@ The columns `H` and `moid` are not used as predictive features because they are 
 
 They are retained for separate analysis and verification.
 
-## 4. Feature Selection
+## 5. Feature Selection
 
 The main experiments use the following six features:
 
@@ -58,7 +67,7 @@ The main experiments use the following six features:
 
 For the orbital-only experiment, diameter is removed and only the five orbital features are used.
 
-## 5. Train-Test Split
+## 6. Train-Test Split
 
 The labelled dataset is divided using an 80:20 stratified split.
 
@@ -70,7 +79,7 @@ Stratification is used to maintain the class distribution in both sets.
 
 The preprocessing methods are fitted using training data to avoid using information from the test set during imputation.
 
-## 6. Machine Learning Model
+## 7. Machine Learning Model
 
 The main experiments use HistGradientBoostingClassifier.
 
@@ -84,7 +93,7 @@ The model parameters are:
 
 Balanced class weights are used because the dataset contains considerably fewer PHA records than non-PHA records.
 
-## 7. Missing-Data Handling Techniques
+## 8. Missing-Data Handling Techniques
 
 Six different methods are compared.
 
@@ -118,7 +127,7 @@ Only records with complete values for all six selected features are retained.
 
 This method uses fewer records than the other methods.
 
-## 8. Orbital-Only Experiment (M7)
+## 9. Orbital-Only Experiment (M7)
 
 An additional experiment is performed using only the five orbital features:
 
@@ -134,7 +143,7 @@ The same HistGradientBoostingClassifier configuration is used.
 
 This experiment helps compare classification performance with and without diameter information.
 
-## 9. Random Forest Experiment
+## 10. Random Forest Experiment
 
 A separate Random Forest classifier is implemented using the same six selected features.
 
@@ -153,7 +162,7 @@ The threshold is selected to maximise recall while maintaining a minimum precisi
 
 The final test set is not used for threshold selection.
 
-## 10. Model Evaluation
+## 11. Model Evaluation
 
 The following evaluation metrics are used:
 
@@ -171,7 +180,7 @@ The following evaluation metrics are used:
 
 Confusion matrices are also used to examine true positives, true negatives, false positives, and false negatives.
 
-## 11. Repeated Evaluation
+## 12. Repeated Evaluation
 
 The experiments are repeated using 10 stratified train-test splits.
 
@@ -181,7 +190,7 @@ The mean and standard deviation of the evaluation metrics are calculated to stud
 
 M6 is evaluated separately because it uses only complete records.
 
-## 12. Bootstrap Analysis
+## 13. Bootstrap Analysis
 
 Bootstrap analysis is used to examine uncertainty in model evaluation.
 
@@ -192,7 +201,7 @@ The notebook performs:
 
 The results are used to examine the variability of performance metrics and differences between methods.
 
-## 13. Missingness Pattern Analysis
+## 14. Missingness Pattern Analysis
 
 Diameter availability is studied across different absolute magnitude groups.
 
@@ -209,7 +218,7 @@ PHA rates are also compared between records with available and missing diameter.
 
 This analysis helps identify whether diameter missingness is distributed equally across different asteroid groups.
 
-## 14. Discovery Period Analysis
+## 15. Discovery Period Analysis
 
 The `first_obs` column is used to group asteroids according to their discovery decade.
 
@@ -219,7 +228,7 @@ This helps examine changes in diameter availability across discovery periods.
 
 The results are interpreted carefully because some decades have smaller sample sizes.
 
-## 15. MOID Analysis
+## 16. MOID Analysis
 
 A simplified rule based on MOID ≤ 0.05 AU is evaluated against the existing PHA labels.
 
@@ -231,7 +240,7 @@ This demonstrates that MOID alone is not sufficient to reproduce the existing PH
 
 The rule is used only for analysis and does not replace the original PHA labels.
 
-## 16. NASA/JPL Record Verification
+## 17. NASA/JPL Record Verification
 
 Two groups of records are selected for additional verification.
 
@@ -251,7 +260,7 @@ H uncertainty information was available for eight records. All eight reported un
 
 These checks are used to examine selected records and retain the original PHA labels.
 
-## 17. Implementation
+## 18. Implementation
 
 The project is implemented using Python and Google Colab.
 
@@ -271,7 +280,7 @@ The output CSV files are uploaded to the GitHub results folders.
 
 NASA/JPL API requests are used for selected verification analyses, so an internet connection is required.
 
-## 18. Testing
+## 19. Testing
 
 The repository contains Python source files for loading CSV data and calculating missingness summaries.
 
@@ -285,7 +294,7 @@ The workflow has completed successfully.
 
 These tests check the diagnostics functionality. They do not execute the complete machine learning notebooks.
 
-## 19. Limitations
+## 20. Limitations
 
 1. A large proportion of diameter measurements are missing.
 2. The PHA class is highly imbalanced.
@@ -295,7 +304,7 @@ These tests check the diagnostics functionality. They do not execute the complet
 6. The models classify existing PHA labels and do not predict actual asteroid impacts.
 7. NASA/JPL API responses may change over time.
 
-## 20. Conclusion
+## 21. Conclusion
 
 The methodology compares different missing-data handling techniques and studies their effect on PHA classification.
 
@@ -304,3 +313,15 @@ The experiments also examine orbital-only classification, Random Forest threshol
 The additional NASA/JPL verification analyses help examine selected records where simplified classification rules and existing PHA labels differ.
 
 The overall methodology provides a comparison of missing-data strategies and highlights the importance of understanding missingness when applying machine learning to astronomical datasets.
+
+## 22. References
+
+1. NASA/JPL Small-Body Database (SBDB). https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html
+
+2. NASA/JPL Small-Body Database Query API. https://ssd-api.jpl.nasa.gov/doc/sbdb_query.html
+
+3. NASA/JPL Small-Body Database API. https://ssd-api.jpl.nasa.gov/doc/sbdb.html
+
+4. Nair, R. R., & Babu, T. (2025). *Effective Hazard Categorization of Near-Earth Objects with Random Forest Techniques.* Procedia Computer Science, 259, 1682–1692. https://doi.org/10.1016/j.procs.2025.04.123
+
+5. Malakouti, S. M., Menhaj, M. B., & Suratgar, A. A. (2023). *Machine Learning Techniques for Classifying Dangerous Asteroids.* MethodsX, 11, 102337. https://doi.org/10.1016/j.mex.2023.102337
