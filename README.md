@@ -12,6 +12,15 @@ The project also examines the relationship between diameter availability, absolu
 
 How does selection bias associated with missing asteroid diameter measurements affect machine learning classification of potentially hazardous Near-Earth Asteroids, and how do different missing-data strategies compare?
 
+## Related Research
+
+Two research papers were referred to while developing this project:
+
+1. *Effective Hazard Categorization of Near-Earth Objects with Random Forest Techniques* (Nair and Babu, 2025) uses Random Forest for classifying hazardous and non-hazardous Near-Earth Objects.
+2. *Machine Learning Techniques for Classifying Dangerous Asteroids* (Malakouti et al., 2023) compares different machine learning classifiers, including Random Forest, Extra Trees, LightGBM, Gradient Boosting, and AdaBoost.
+
+These papers provide background on applying machine learning to asteroid hazard classification. Our project focuses further on the effect of missing diameter measurements and compares different strategies for handling missing data.
+
 ## Objectives
 
 1. To study the missing values present in the asteroid dataset.
@@ -226,3 +235,5 @@ https://github.com/meherhasija/neo-missingness-lab
 1. NASA/JPL Small-Body Database: https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html
 2. NASA/JPL SBDB Query API: https://ssd-api.jpl.nasa.gov/doc/sbdb_query.html
 3. NASA/JPL SBDB API: https://ssd-api.jpl.nasa.gov/doc/sbdb.html
+4. Nair, R. R., & Babu, T. (2025). *Effective Hazard Categorization of Near-Earth Objects with Random Forest Techniques.* Procedia Computer Science, 259, 1682–1692. https://doi.org/10.1016/j.procs.2025.04.123
+5. Malakouti, S. M., Menhaj, M. B., & Suratgar, A. A. (2023). *Machine Learning Techniques for Classifying Dangerous Asteroids.* MethodsX, 11, 102337. https://doi.org/10.1016/j.mex.2023.102337
