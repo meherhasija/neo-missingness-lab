@@ -1,271 +1,306 @@
 # Research Methodology
 
-## 1. Research Question
+## 1. Introduction
 
-How does selection bias associated with missing asteroid diameter measurements affect Machine Learning-based classification of potentially hazardous near-Earth asteroids, and how do different missing-data handling strategies compare?
+The project focuses on machine learning-based classification of Potentially Hazardous Asteroids (PHAs).
 
-## 2. Dataset Description
+The main focus is to study how missing asteroid diameter measurements affect classification performance and to compare different techniques for handling missing values.
 
-The dataset was obtained from the NASA/JPL Small-Body Database (SBDB).
+The research also examines whether diameter availability is related to absolute magnitude and discovery period.
 
-- Total records: 42,815
-- Records with valid PHA labels: 42,680
-- Non-PHA records: 40,130
-- PHA records: 2,550
-- Records with missing diameter: 41,569
-- Diameter missingness: 97.09%
+## 2. Dataset Collection
 
-Records with missing target labels were excluded from supervised model evaluation.
+The dataset is obtained from the NASA/JPL Small-Body Database.
 
-The target variable is `pha`, where Y represents a PHA classification and N represents a non-PHA classification.
+File used: `data/neo_asteroid_dataset.csv`
 
-All records in the dataset are Near-Earth Objects.
+The dataset contains 42,815 records and 21 columns.
 
-## 3. Feature Selection
+Out of these records, 42,680 have valid PHA labels. The remaining 135 records with missing PHA labels are excluded from supervised classification.
 
-### 3.1 Main Features
+The labelled dataset contains:
 
-The main experiments used:
+- 40,130 non-PHA records.
+- 2,550 PHA records.
 
-1. `a` – Semi-major axis
-2. `e` – Orbital eccentricity
-3. `i` – Orbital inclination
-4. `om` – Longitude of ascending node
-5. `w` – Argument of perihelion
-6. `diameter` – Asteroid diameter
+The positive class represents approximately 5.97% of the labelled dataset.
 
-### 3.2 Excluded Features
+Diameter is missing in 41,569 records of the original dataset, which represents approximately 97.09%.
 
-- `pha`: Used as the target variable, not as a predictor.
-- `moid`: Excluded because it is directly involved in the official PHA definition.
-- `H`: Excluded because it is directly involved in the official PHA definition.
-- Identifiers: Excluded because they identify objects rather than provide suitable predictive measurements.
-- `q`: Excluded because it is redundant with other orbital parameters.
-- `albedo`: Excluded because approximately 97% of its values are missing.
+## 3. Data Preprocessing
 
-Diameter was retained because missing diameter measurements are the central subject of the research.
+The following preprocessing steps are performed:
 
-## 4. Data Preprocessing
+1. The CSV dataset is loaded using Pandas.
+2. The dataset is checked for missing values.
+3. Records with missing PHA labels are excluded from supervised classification.
+4. PHA values are converted into numerical labels, where N = 0 and Y = 1.
+5. The required orbital and diameter features are selected.
+6. Unnecessary identifiers and unsuitable columns are excluded.
+7. The dataset is divided into training and testing sets.
 
-1. Records without PHA target labels were removed.
-2. The remaining labelled records were used for supervised learning.
-3. A stratified 80:20 train-test split was created.
-4. The split used `random_state=42`.
-5. The test set contained 8,536 records, including 510 PHA records.
-6. Preprocessing and imputation were performed according to the requirements of each experimental method.
+The columns `H` and `moid` are not used as predictive features because they are directly related to PHA classification criteria.
 
-The target variable was not imputed.
+They are retained for separate analysis and verification.
 
-## 5. Main Experimental Methods
+## 4. Feature Selection
 
-Six missing-data strategies were evaluated.
+The main experiments use the following six features:
+
+| Feature | Description |
+|---|---|
+| a | Semi-major axis |
+| e | Orbital eccentricity |
+| i | Orbital inclination |
+| om | Longitude of ascending node |
+| w | Argument of perihelion |
+| diameter | Asteroid diameter |
+
+For the orbital-only experiment, diameter is removed and only the five orbital features are used.
+
+## 5. Train-Test Split
+
+The labelled dataset is divided using an 80:20 stratified split.
+
+- Training records: 34,144
+- Testing records: 8,536
+- Random state: 42
+
+Stratification is used to maintain the class distribution in both sets.
+
+The preprocessing methods are fitted using training data to avoid using information from the test set during imputation.
+
+## 6. Machine Learning Model
+
+The main experiments use HistGradientBoostingClassifier.
+
+The model parameters are:
+
+- Maximum iterations: 100
+- Learning rate: 0.1
+- Class weight: Balanced
+- Random state: 42
+- Early stopping: Disabled
+
+Balanced class weights are used because the dataset contains considerably fewer PHA records than non-PHA records.
+
+## 7. Missing-Data Handling Techniques
+
+Six different methods are compared.
 
 ### M1: Native Missing-Value Handling
 
-The HistGradientBoostingClassifier was used with its native missing-value handling capability.
+The model's built-in missing-value handling is used without applying a separate imputation technique.
 
 ### M2: Median Imputation
 
-Missing diameter values were replaced with the median diameter calculated from the training data.
+Missing values are replaced with the median calculated from the training data.
 
 ### M3: Median Imputation with Missingness Indicator
 
-Median imputation was combined with an additional indicator feature that records whether the original diameter value was missing.
+Median imputation is combined with an additional binary column that indicates whether the original diameter value was missing.
 
 ### M4: KNN Imputation
 
-KNN imputation was performed using five nearest neighbours. Orbital features were scaled using training data, and only training records with known diameter values were used as donors.
+The missing diameter values are estimated using the five nearest neighbours.
+
+The orbital features are scaled before calculating distances. Training records with known diameter values are used as neighbours.
 
 ### M5: Iterative Imputation
 
-Iterative imputation was performed using Bayesian Ridge regression within a StandardScaler pipeline.
+Iterative imputation is performed using Bayesian Ridge regression.
+
+The method estimates missing values by using relationships between the selected features.
 
 ### M6: Complete-Case Analysis
 
-Records containing missing values in the selected features were removed.
+Only records with complete values for all six selected features are retained.
 
-The complete-case model was evaluated on 247 test records. Its results are therefore not directly comparable with methods evaluated on the full test set.
+This method uses fewer records than the other methods.
 
-## 6. Model Configuration
+## 8. Orbital-Only Experiment (M7)
 
-The six main experiments used the following configuration:
+An additional experiment is performed using only the five orbital features:
 
-- Model: HistGradientBoostingClassifier
-- Maximum iterations: 100
-- Learning rate: 0.1
-- Random state: 42
-- Class weighting: Balanced
-- Early stopping: False
+- a
+- e
+- i
+- om
+- w
 
-The same main classifier configuration was used to compare the different missing-data strategies.
+Diameter is excluded completely.
 
-## 7. Evaluation Procedure
+The same HistGradientBoostingClassifier configuration is used.
 
-The main train-test evaluation used a stratified 80:20 split.
+This experiment helps compare classification performance with and without diameter information.
 
-M1–M5 were evaluated on the full test set of 8,536 records.
+## 9. Random Forest Experiment
 
-The methods were additionally evaluated on:
-- The measured-diameter subset: 247 records.
-- The missing-diameter subset: 8,289 records.
+A separate Random Forest classifier is implemented using the same six selected features.
 
-M6 was evaluated only on the complete-case test subset of 247 records.
+The model uses 300 trees, balanced class weights, and random state 42.
 
-The following metrics were calculated:
+Median imputation with missingness indicators is used before classification.
 
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-- Average Precision
+Two classification thresholds are compared:
 
-Average Precision and recall were given particular attention because the PHA class represents approximately 5.98% of the labelled dataset.
+1. Default threshold of 0.50.
+2. A threshold selected using five-fold stratified out-of-fold predictions on the training data.
 
-## 8. Orbital-Only Baseline (M7)
+The selected threshold is approximately 0.1233.
 
-An additional experiment was performed without using asteroid diameter.
+The threshold is selected to maximise recall while maintaining a minimum precision of 20% on the training out-of-fold predictions.
 
-The predictors were:
+The final test set is not used for threshold selection.
 
-- `a`
-- `e`
-- `i`
-- `om`
-- `w`
+## 10. Model Evaluation
 
-The same HistGradientBoostingClassifier configuration was used.
+The following evaluation metrics are used:
 
-This experiment provides a comparison for understanding the contribution of diameter-related information and the performance of orbital features when diameter is unavailable.
+**Accuracy:** Measures the proportion of correct predictions.
 
-## 9. Repeated Evaluation and Bootstrap Analysis
+**Precision:** Measures how many predicted PHA records are actually PHA records.
 
-The evaluation was extended using 10 stratified splits.
+**Recall:** Measures how many actual PHA records are correctly identified.
 
-Performance metrics were collected across the repeated experiments to examine variation between splits.
+**F1-score:** Combines precision and recall into a single measure.
 
-Bootstrap analyses were also performed to examine uncertainty in model comparisons and paired differences.
+**ROC-AUC:** Measures the ability of the model to distinguish between the two classes across different thresholds.
 
-The bootstrap summaries are descriptive and should not be interpreted as formal independent-sample significance tests.
+**Average Precision:** Summarises precision-recall performance and is useful for imbalanced datasets.
 
-## 10. Missingness Analysis
+Confusion matrices are also used to examine true positives, true negatives, false positives, and false negatives.
 
-The availability of diameter measurements was investigated against the existing PHA labels.
+## 11. Repeated Evaluation
 
-### 10.1 Diameter Availability and PHA Distribution
+The experiments are repeated using 10 stratified train-test splits.
 
-- Missing diameter group: 39,224 non-PHA and 2,210 PHA records.
-- Available diameter group: 906 non-PHA and 340 PHA records.
-- PHA rate among records with missing diameter: 5.33%.
-- PHA rate among records with available diameter: 27.29%.
+The base random state is 42.
 
-These differences indicate an association between diameter availability and the observed PHA distribution.
+The mean and standard deviation of the evaluation metrics are calculated to study how model performance changes across different splits.
 
-### 10.2 Analysis by H Categories
+M6 is evaluated separately because it uses only complete records.
 
-Diameter availability and PHA rates were compared across four H categories:
+## 12. Bootstrap Analysis
 
-1. H ≤ 18
-2. 18 < H ≤ 20
-3. 20 < H ≤ 22
-4. H > 22
+Bootstrap analysis is used to examine uncertainty in model evaluation.
 
-Diameter availability declined substantially as H increased.
+The notebook performs:
 
-The analysis was used to investigate whether missingness patterns differ across absolute-magnitude categories.
+- 200 bootstrap iterations for metric confidence intervals within each split.
+- 1,000 paired bootstrap iterations for comparisons between methods.
 
-### 10.3 Discovery-Era Analysis
+The results are used to examine the variability of performance metrics and differences between methods.
 
-The `first_obs` field was used to group records by discovery decade.
+## 13. Missingness Pattern Analysis
 
-Diameter availability and PHA rates were compared between measured and unmeasured groups across decades.
+Diameter availability is studied across different absolute magnitude groups.
 
-The analysis showed a decline in diameter availability in more recent discovery periods.
+The dataset is divided into four groups:
 
-Some decades contain small sample sizes, and the 2020s measured group contains only one record. These small groups should not be used to make strong statistical conclusions.
+- H ≤ 18
+- 18 < H ≤ 20
+- 20 < H ≤ 22
+- H > 22
 
-The analysis identifies associations and does not establish that discovery era causes diameter missingness.
+For each group, the total number of records, available diameter values, and missing diameter values are calculated.
 
-## 11. Investigation of 33 PHA Records with H > 22
+PHA rates are also compared between records with available and missing diameter.
 
-The dataset contained 33 records with `pha = Y` and H values above 22.
+This analysis helps identify whether diameter missingness is distributed equally across different asteroid groups.
 
-These records were investigated using two NASA/JPL SBDB API methods.
+## 14. Discovery Period Analysis
 
-### 11.1 Individual Object API Verification
+The `first_obs` column is used to group asteroids according to their discovery decade.
 
-Each of the 33 objects was queried individually.
+The number of records with available and missing diameter is calculated for each decade.
 
-The verification checked:
+This helps examine changes in diameter availability across discovery periods.
 
-- Object name
-- NEO classification
-- PHA classification
-- Absolute magnitude H
-- MOID
-- Orbital solution information
-- Available physical-parameter uncertainty information
+The results are interpreted carefully because some decades have smaller sample sizes.
 
-All 33 records returned `PHA = True` and `NEO = True`.
+## 15. MOID Analysis
 
-### 11.2 Query API Cross-Check
+A simplified rule based on MOID ≤ 0.05 AU is evaluated against the existing PHA labels.
 
-The SBDB Query API was queried using the current PHA group filter.
+The rule is compared using accuracy, precision, recall, F1-score, and a confusion matrix.
 
-The query returned 2,550 asteroid records.
+The analysis produces 20,607 false positives and achieves 100% recall.
 
-All 33 investigated objects were found in the current query results, and all had `pha = Y`.
+This demonstrates that MOID alone is not sufficient to reproduce the existing PHA classification.
 
-### 11.3 H Uncertainty Analysis
+The rule is used only for analysis and does not replace the original PHA labels.
 
-Of the 33 records:
+## 16. NASA/JPL Record Verification
 
-- Eight had reported H uncertainty values.
-- Twenty-five did not have reported H uncertainty values.
-- All eight reported uncertainty intervals included H = 22.
+Two groups of records are selected for additional verification.
 
-The missing uncertainty values for the remaining records were treated as unavailable information, not as zero uncertainty.
+### Verification of 17 MOID Disagreements
 
-### 11.4 Interpretation
+Seventeen records with PHA = N, MOID ≤ 0.05 AU, and H ≤ 22 are checked using the NASA/JPL SBDB API.
 
-The official CNEOS PHA definition specifies both MOID ≤ 0.05 AU and H ≤ 22.
+All 17 records returned a current PHA flag of False.
 
-However, both current SBDB API checks returned PHA classifications for all 33 records despite their H values being above 22.
+### Verification of 33 Records with H > 22
 
-The reason for this apparent discrepancy has not been established.
+Thirty-three records with PHA = Y and H > 22 are checked using the individual SBDB API and the SBDB Query API.
 
-The records were retained without automatically changing their labels. The discrepancy is documented as a data-validation finding requiring further clarification.
+All 33 returned a current PHA flag of True.
 
-## 12. Random Forest Baseline
+H uncertainty information was available for eight records. All eight reported uncertainty intervals included H = 22.
 
-A Random Forest baseline was also implemented separately.
+These checks are used to examine selected records and retain the original PHA labels.
 
-Threshold tuning was explored to examine the effect of class imbalance on hazardous-class detection.
+## 17. Implementation
 
-The threshold-tuned and default Random Forest results should not be treated as a strictly controlled threshold-only comparison because their training procedures differed.
+The project is implemented using Python and Google Colab.
 
-The Random Forest results are therefore treated as an additional exploratory baseline rather than a direct replacement for the six main experiments.
+The main notebook is:
 
-## 13. Research Safeguards and Limitations
+`notebooks/NEO_Complete.ipynb`
 
-The following considerations apply to the study:
+The separate Random Forest notebook is:
 
-- The target variable was not imputed.
-- `moid` and `H` were excluded from the main predictor set to avoid direct target leakage.
-- Imputation methods used training data for estimating missing values.
-- Complete-case results were interpreted separately because of their smaller evaluation sample.
-- Results were examined using multiple performance metrics rather than accuracy alone.
-- Associations between missingness, H categories, discovery periods and PHA labels were not interpreted as causal evidence.
-- The original dataset retrieval date and exact original API query provenance have not been fully established.
-- The 33-record PHA/H discrepancy remains unresolved.
-- Results depend on the dataset snapshot, features, model configuration and evaluation split.
+`notebooks/Random_Forest_PHA_Baseline.ipynb`
 
-## 14. Conclusion
+Both notebooks load the dataset directly from the GitHub raw CSV file.
 
-The methodology compares six missing-data handling strategies and an additional orbital-only baseline for PHA classification.
+The generated analysis files are saved in the Colab output directory and downloaded as ZIP files.
 
-It also investigates diameter availability across PHA groups, H categories and discovery decades.
+The output CSV files are uploaded to the GitHub results folders.
 
-The additional JPL API investigation provides a validation check for 33 records with H values above 22 that are nevertheless classified as PHA by the current API responses.
+NASA/JPL API requests are used for selected verification analyses, so an internet connection is required.
 
-Together, these experiments examine the effect of missing measurements on classification performance and highlight the importance of data validation, leakage prevention and careful interpretation of imbalanced classification results.
+## 18. Testing
+
+The repository contains Python source files for loading CSV data and calculating missingness summaries.
+
+The tests are located in:
+
+`tests/test_diagnostics.py`
+
+GitHub Actions is configured to run the tests whenever changes are pushed to the main branch or a pull request is created.
+
+The workflow has completed successfully.
+
+These tests check the diagnostics functionality. They do not execute the complete machine learning notebooks.
+
+## 19. Limitations
+
+1. A large proportion of diameter measurements are missing.
+2. The PHA class is highly imbalanced.
+3. Complete-case analysis uses fewer records.
+4. Missingness patterns show associations but do not prove causation.
+5. Model results depend on the dataset and experimental settings.
+6. The models classify existing PHA labels and do not predict actual asteroid impacts.
+7. NASA/JPL API responses may change over time.
+
+## 20. Conclusion
+
+The methodology compares different missing-data handling techniques and studies their effect on PHA classification.
+
+The experiments also examine orbital-only classification, Random Forest threshold selection, repeated evaluation, bootstrap analysis, and missingness patterns across absolute magnitude groups and discovery periods.
+
+The additional NASA/JPL verification analyses help examine selected records where simplified classification rules and existing PHA labels differ.
+
+The overall methodology provides a comparison of missing-data strategies and highlights the importance of understanding missingness when applying machine learning to astronomical datasets.
